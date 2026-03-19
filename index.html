@@ -31,13 +31,85 @@
             --font-body: 'Cairo', sans-serif;
         }
 
+        /* TÉCNICA 1: Bloqueio de Seleção */
         body {
             font-family: var(--font-body);
             color: var(--grey-dark);
             background-color: #f4f5f7;
             overflow-x: hidden;
+            
+            /* Bloqueia seleção de texto */
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
         }
 
+        /* Defesa Extrema: Sem transições para ser o mais rápido possível */
+        #secure-wrapper {
+            min-height: 100vh;
+        }
+        
+        body.is-secured {
+            overflow: hidden !important; 
+        }
+        
+        body.is-secured #secure-wrapper {
+            display: none !important; /* Em vez de desfocar, removemos o conteúdo da renderização imediatamente */
+        }
+
+        /* OVERLAY FIXO TIPO BLACKOUT */
+        #security-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #1a1a1a; /* Ecrã escuro para ofuscar totalmente */
+            z-index: 9999999;
+            display: none; /* Usando display none/flex para forçar o navegador a redesenhar a tela rápido */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        body.is-secured #security-overlay {
+            display: flex; /* Ecrã preto aparece no frame imediato */
+            pointer-events: all;
+        }
+
+        /* TÉCNICA 3: Bloqueio de Impressão via CSS */
+        #print-warning {
+            display: none;
+        }
+
+        @media print {
+            body {
+                background-color: white;
+            }
+            #secure-wrapper {
+                display: none !important; /* Esconde todo o conteúdo */
+            }
+            #print-warning {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                text-align: center;
+                color: var(--primary-dark);
+                font-family: var(--font-title);
+            }
+            #print-warning i {
+                font-size: 4rem;
+                color: var(--accent-orange);
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Estilos Originais */
         h1, h2, h3, h4, h5, h6 {
             font-family: var(--font-title);
             font-weight: 700;
@@ -48,7 +120,6 @@
         .text-accent { color: var(--accent-orange); }
         .bg-dark-brand { background-color: var(--primary-dark); }
         .bg-orange { background-color: var(--accent-orange); }
-        /* Nova classe para garantir a borda laranja exata da marca */
         .border-orange { border-color: var(--accent-orange) !important; }
         .section-padding { padding: 80px 0; }
         
@@ -114,18 +185,16 @@
         /* Block 1: Diagnosis Cards */
         .card-diagnosis {
             border: none;
-            border-left: 5px solid var(--accent-orange); /* Levemente mais espesso para presença */
-            border-radius: 16px; /* ARREDONDAMENTO: Remove o aspecto 'pontiagudo' */
+            border-left: 5px solid var(--accent-orange);
+            border-radius: 16px;
             background: white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* Sombra mais difusa e moderna */
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Motion Unificado */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             height: 100%;
-            overflow: hidden; /* Garante que a borda lateral siga a curva do radius */
+            overflow: hidden;
         }
-        /* Correção de Visibilidade: Garante que o card escuro tenha prioridade sobre o branco */
         .card-diagnosis.bg-dark-brand {
             background-color: var(--primary-dark);
-            /* Mantém a borda visível e adiciona um leve brilho para destacar o "Objetivo" */
             box-shadow: 0 10px 30px rgba(56, 56, 66, 0.2);
         }
         .card-diagnosis:hover {
@@ -306,22 +375,18 @@
 
         /* --- MOTION ESTRATÉGICO --- */
         .architecture-card {
-            /* Efeito elástico para modernidade */
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             position: relative;
             z-index: 1;
-            /* Feedback de interatividade */
             cursor: default;
         }
         
         .architecture-card:hover {
-            transform: translateY(-10px) scale(1.02); /* Elevação padrão */
+            transform: translateY(-10px) scale(1.02); 
             box-shadow: 0 20px 40px rgba(56, 56, 66, 0.15) !important;
             z-index: 10;
         }
 
-        /* Ajuste Específico para o Card 'Featured' (Opção B) */
-        /* Garante que ele cresça proporcionalmente (1.05 -> 1.08) em vez de encolher para 1.02 */
         .pricing-card.featured.architecture-card:hover {
             transform: translateY(-10px) scale(1.08);
         }
@@ -346,561 +411,614 @@
 </head>
 <body data-bs-spy="scroll" data-bs-target="#navbar-main" data-bs-offset="100">
 
-    <!-- Navbar -->
-    <nav id="navbar-main" class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <!-- Logo aplicada conforme solicitado (Versão Branca para fundo escuro) -->
-                <img src="https://lh3.googleusercontent.com/u/0/d/1A3GnfXXmHnzeuaJQPtV4xg_GLYzPSKFk" alt="SoftHouse Logo" height="40" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='inline-block';">
-                <span id="logo-fallback" style="display:none;"><i class="fa-solid fa-code text-accent"></i> SOFT<span class="text-accent">HOUSE</span></span>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link active" href="#diagnostico">O Cenário</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#solucao">A Solução</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#escopo">Escopo</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#cronograma">Cronograma</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#investimento">Investimento</a></li>
-                    <li class="nav-item ms-3">
-                        <a class="btn btn-brand btn-sm" href="#proximos-passos">Aprovar Proposta</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <!-- Overlay de Segurança Fixo (Blackout Total) -->
+    <div id="security-overlay">
+        <i class="fa-solid fa-eye-slash" style="font-size: 4rem; color: var(--accent-orange); margin-bottom: 20px;"></i>
+        <h2 id="security-title" style="font-family: var(--font-title); color: white;">Conteúdo Protegido</h2>
+        <p id="security-message" style="color: var(--grey-light);">Conteúdo contém informações sigilosas.</p>
+    </div>
 
-    <!-- Header -->
-    <header class="hero d-flex align-items-center">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8">
-                    <span class="text-accent fw-bold mb-2 d-block">PROPOSTA COMERCIAL - MAIDSYS #2025-0303</span>
-                    <!-- Typewriter Effect Title -->
-                    <h1 class="display-4 mb-4">
-                        <span id="type-part1"></span>
-                        <span id="type-part2" class="text-accent"></span><span class="typing-cursor"></span>
-                    </h1>
-                    <p class="lead mb-4 text-light opacity-75">
-                        Um plano estruturado para desenvolvimento do SaaS MaidSys.
-                    </p>
-                    <div class="d-flex gap-3">
-                        <div class="d-flex align-items-center">
-                            <i class="fa-solid fa-user-tie text-accent me-2"></i>
-                            <small>Responsável: <strong>Leonardo P Monteiro CRA - CE 20-89246</strong></small>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <i class="fa-regular fa-calendar text-accent me-2"></i>
-                            <small>Data: <strong>06/03/2026</strong></small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- Mensagem mostrada apenas na tentativa de impressão (Ctrl+P) -->
+    <div id="print-warning">
+        <i class="fa-solid fa-user-secret"></i>
+        <h2>Acesso Restrito</h2>
+        <p>A impressão e extração deste documento comercial está bloqueada por questões de confidencialidade de projeto.</p>
+    </div>
 
-    <!-- Bloco 1: O Diagnóstico (SPIN) -->
-    <section id="diagnostico" class="section-padding">
-        <div class="container">
-            <div class="row mb-5">
-                <div class="col-12 text-center">
-                    <h2 class="text-dark">Entendimento do Cenário</h2>
-                    <p class="text-muted">Um resumo executivo do nosso diagnóstico baseado nas reuniões de briefing.</p>
-                </div>
-            </div>
-
-            <div class="row g-4 justify-content-center">
-                <!-- S: Situation -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card-diagnosis p-4">
-                        <div class="icon-box"><i class="fa-solid fa-magnifying-glass"></i></div>
-                        <h5>Cenário Atual</h5>
-                        <p class="small text-muted">O produto a ser desenvolvido detém arquivo figma materializando o conceito funcional da ferramenta.</p>
-                    </div>
-                </div>
-                
-                <!-- P: Problem -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card-diagnosis p-4">
-                        <div class="icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                        <h5>O Desafio</h5>
-                        <p class="small text-muted">Desenvolver o MVP cuja arquitetura seja preparada para escalabiliade e integração com API's estrangeiras.</p>
-                    </div>
-                </div>
-
-                <!-- I: Implication (O Custo)
-                <div class="col-md-6 col-lg-3">
-                    <div class="card-diagnosis p-4" style="background-color: #fff5f2;">
-                        <div class="icon-box"><i class="fa-solid fa-chart-line-down"></i></div>
-                        <h5 class="text-danger">Implicação (Risco)</h5>
-                        <p class="small text-muted"><strong>Custo da Inércia:</strong> O modelo de negócio e o projeto já foram vazados, o que leva ao risco de concorrência. </p>
-                    </div>
-                </div> -->
-
-                <!-- N: Need-Payoff -->
-                <div class="col-md-6 col-lg-3">
-                    <!-- Removido 'border-0' para manter a identidade visual da borda lateral laranja -->
-                    <div class="card-diagnosis p-4 bg-dark-brand text-white">
-                        <!-- Removido 'text-white' para que o ícone assuma a cor Accent (Laranja), gerando coerência e contraste vibrante -->
-                        <div class="icon-box"><i class="fa-solid fa-bullseye"></i></div>
-                        <h5>Objetivo Estratégico</h5>
-                        <p class="small opacity-75">Entregar um produto apto para testes de estabilidade e posterior implementação comercial.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="alert alert-secondary d-flex align-items-center" role="alert">
-                        <i class="fa-solid fa-lightbulb text-accent fs-3 me-3"></i>
-                        <div>
-                            <strong>Insight da Especialista:</strong>
-                            <span class="fst-italic">"Notamos que o conceito do produto já está bem definido. O desafio do investidor consiste em obter uma equipe qualificada e segurança jurídica para realizar o desenvolvimento do projeto. "</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Bloco 2: Solução Estratégica -->
-    <section id="solucao" class="section-padding bg-light">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-5">
-                    <h2 class="mb-4">Como vamos resolver</h2>
-                    <p class="mb-4 text-muted">Não entregamos apenas código. Entregamos um ativo de propriedade intelectual construído sobre pilares sólidos de engenharia de software e gestão de empresas.</p>
-                    
-                    <ul class="list-unstyled">
-                        <li class="mb-3 d-flex align-items-start">
-                            <i class="fa-solid fa-check-circle text-accent mt-1 me-3"></i>
-                            <div>
-                                <strong>Metodologia Ágil (Scrum):</strong>
-                                <p class="small text-muted m-0">Entregas quinzenais (Sprints) para que vocês vejam valor rápido e ajustem a rota se necessário.</p>
-                            </div>
-                        </li>
-                        <li class="mb-3 d-flex align-items-start">
-                            <i class="fa-solid fa-check-circle text-accent mt-1 me-3"></i>
-                            <div>
-                                <strong>UX Research Centrado no Usuário:</strong>
-                                <p class="small text-muted m-0">Desenhamos as telas pensando em quem vai usar, reduzindo a curva de aprendizado dos perfis de usuário.</p>
-                            </div>
-                        </li>
-                        <li class="mb-3 d-flex align-items-start">
-                            <i class="fa-solid fa-check-circle text-accent mt-1 me-3"></i>
-                            <div>
-                                <strong>Quality Assurance (QA):</strong>
-                                <p class="small text-muted m-0">Prazo de acompanhamento pós entrega para garantir que o produto esteja estável e apto a operar sobre estresse.</p>
-                            </div>
+    <!-- Wrapper de Segurança (Será borrado ou ocultado em tentativas de violação) -->
+    <div id="secure-wrapper">
+        <!-- Navbar -->
+        <nav id="navbar-main" class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <!-- Logo aplicada conforme solicitado (Versão Branca para fundo escuro) -->
+                    <img src="https://lh3.googleusercontent.com/u/0/d/1A3GnfXXmHnzeuaJQPtV4xg_GLYzPSKFk" alt="SoftHouse Logo" height="40" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='inline-block';">
+                    <span id="logo-fallback" style="display:none;"><i class="fa-solid fa-code text-accent"></i> SOFT<span class="text-accent">HOUSE</span></span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link active" href="#diagnostico">O Cenário</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#solucao">A Solução</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#escopo">Escopo</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#cronograma">Cronograma</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#investimento">Investimento</a></li>
+                        <li class="nav-item ms-3">
+                            <a class="btn btn-brand btn-sm" href="#proximos-passos">Aprovar Proposta</a>
                         </li>
                     </ul>
                 </div>
-                <!-- Aplicação do Motion na Coluna/Card solicitado -->
-                <div class="col-lg-6 offset-lg-1">
-                    <!-- Substituído 'border-warning' por 'border-orange' para corrigir a cor -->
-                    <div class="bg-white p-5 rounded shadow-sm border-top border-4 border-orange architecture-card">
-                        <h4 class="mb-3">Arquitetura da Solução</h4>
-                        <p>O sistema será uma <strong>Aplicação Web</strong>, permitindo acesso via desktop e design responsivo para mobile, o que remove a necessidade de desenvolvimento de um aplicativo por enquanto.</p>
-                        <hr>
-                        <div class="row text-center mt-4">
-                            <div class="col-4">
-                                <i class="fa-brands fa-react fa-2x text-primary mb-2"></i>
-                                <p class="small fw-bold">Frontend<br>React.js</p>
+            </div>
+        </nav>
+
+        <!-- Header -->
+        <header class="hero d-flex align-items-center">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <span class="text-accent fw-bold mb-2 d-block">PROPOSTA COMERCIAL - MAIDSYS #2025-0303</span>
+                        <!-- Typewriter Effect Title -->
+                        <h1 class="display-4 mb-4">
+                            <span id="type-part1"></span>
+                            <span id="type-part2" class="text-accent"></span><span class="typing-cursor"></span>
+                        </h1>
+                        <p class="lead mb-4 text-light opacity-75">
+                            Um plano estruturado para desenvolvimento do SaaS MaidSys.
+                        </p>
+                        <div class="d-flex gap-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fa-solid fa-user-tie text-accent me-2"></i>
+                                <small>Responsável: <strong>Leonardo P Monteiro CRA - CE 20-89246</strong></small>
                             </div>
-                            <div class="col-4">
-                                <i class="fa-brands fa-python fa-2x text-primary mb-2"></i>
-                                <p class="small fw-bold">Backend<br>Python</p>
-                            </div>
-                            <div class="col-4">
-                                <i class="fa-solid fa-database fa-2x text-info mb-2"></i>
-                                <p class="small fw-bold">Dados<br>PostgreSQL</p>
+                            <div class="d-flex align-items-center">
+                                <i class="fa-regular fa-calendar text-accent me-2"></i>
+                                <small>Data: <strong>06/03/2026</strong></small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </header>
 
-    <!-- Bloco 3: Escopo e Entregáveis -->
-    <section id="escopo" class="section-padding">
-        <div class="container">
-            <h2 class="text-center mb-5">Escopo Funcional</h2>
-            
-            <div class="row">
-                <div class="col-lg-8 mx-auto">
-                    <div class="accordion" id="accordionScope">
+        <!-- Bloco 1: O Diagnóstico (SPIN) -->
+        <section id="diagnostico" class="section-padding">
+            <div class="container">
+                <div class="row mb-5">
+                    <div class="col-12 text-center">
+                        <h2 class="text-dark">Entendimento do Cenário</h2>
+                        <p class="text-muted">Um resumo executivo do nosso diagnóstico baseado nas reuniões de briefing.</p>
+                    </div>
+                </div>
+
+                <div class="row g-4 justify-content-center">
+                    <!-- S: Situation -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card-diagnosis p-4">
+                            <div class="icon-box"><i class="fa-solid fa-magnifying-glass"></i></div>
+                            <h5>Cenário Atual</h5>
+                            <p class="small text-muted">O produto a ser desenvolvido detém arquivo figma materializando o conceito funcional da ferramenta.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- P: Problem -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card-diagnosis p-4">
+                            <div class="icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                            <h5>O Desafio</h5>
+                            <p class="small text-muted">Desenvolver o MVP cuja arquitetura seja preparada para escalabiliade e integração com API's estrangeiras.</p>
+                        </div>
+                    </div>
+
+                    <!-- N: Need-Payoff -->
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card-diagnosis p-4 bg-dark-brand text-white">
+                            <div class="icon-box"><i class="fa-solid fa-bullseye"></i></div>
+                            <h5>Objetivo Estratégico</h5>
+                            <p class="small opacity-75">Entregar um produto apto para testes de estabilidade e posterior implementação comercial.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="alert alert-secondary d-flex align-items-center" role="alert">
+                            <i class="fa-solid fa-lightbulb text-accent fs-3 me-3"></i>
+                            <div>
+                                <strong>Insight da Especialista:</strong>
+                                <span class="fst-italic">"Notamos que o conceito do produto já está bem definido. O desafio do investidor consiste em obter uma equipe qualificada e segurança jurídica para realizar o desenvolvimento do projeto. "</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bloco 2: Solução Estratégica -->
+        <section id="solucao" class="section-padding bg-light">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-5">
+                        <h2 class="mb-4">Como vamos resolver</h2>
+                        <p class="mb-4 text-muted">Não entregamos apenas código. Entregamos um ativo de propriedade intelectual construído sobre pilares sólidos de engenharia de software e gestão de empresas.</p>
                         
-                        <!-- Módulo 1 -->
-                        <div class="accordion-item mb-3 border">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mod1">
-                                    <i class="fa-solid fa-layer-group me-2"></i> Módulo Central - Prazo: 4 Meses
-                                </button>
-                            </h2>
-                            <div id="mod1" class="accordion-collapse collapse">
-                                <div class="accordion-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">Acessoria e Documentação: Levantamento e documentação de toda a regra de negócio.</li>
-                                        <li class="list-group-item">Maids System: Ambiente administrativo de gestão e acompanhamento de dados da plataforma.</li>
-                                        <li class="list-group-item">Maids System: Controle financeiro da empresa SaaS.</li>
-                                        <li class="list-group-item">Ambiente administrativo do módulo central (configurações do perfil e parâmetros da conta da empresa de limpeza).</li>
-                                        <li class="list-group-item">Gestão de agendamentos: Criação, edição e visualização de serviços agendados.</li>
-                                        <li class="list-group-item">Cadastro e gerenciamento de clientes: Informações de contato, histórico de serviços, preferências.</li>
-                                        <li class="list-group-item">Controle financeiro: Emissão de faturas (invoices), registro de pagamentos recebidos e pendentes.</li>
-                                        <li class="list-group-item">Gestão de equipes: Atribuição de tarefas aos ajudantes e acompanhamento do status.</li>
-                                        <li class="list-group-item">Relatórios básicos: Desempenho de agendamentos e pagamentos.</li>
-                                        <li class="list-group-item">UX Design: Design responsivo para desktop e celular.</li>
-                                        <li class="list-group-item">Almoxarife para controle básico de estoque de consumo.</li>
-                                        <li class="list-group-item">Integrações com API’s: Integração com serviços externos.</li>
-                                    </ul>
+                        <ul class="list-unstyled">
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fa-solid fa-check-circle text-accent mt-1 me-3"></i>
+                                <div>
+                                    <strong>Metodologia Ágil (Scrum):</strong>
+                                    <p class="small text-muted m-0">Entregas quinzenais (Sprints) para que vocês vejam valor rápido e ajustem a rota se necessário.</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Módulo 2 -->
-                        <div class="accordion-item mb-3 border">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mod2">
-                                    <i class="fa-solid fa-layer-group me-2"></i> Módulo Cliente - Prazo: 2 meses.
-                                </button>
-                            </h2>
-                            <!-- REMOVIDO: data-bs-parent="#accordionScope" -->
-                            <div id="mod2" class="accordion-collapse collapse">
-                                <div class="accordion-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">Ambiente administrativo do cliente.</li>
-                                        <li class="list-group-item">Visualização de agendamentos/agenda.</li>
-                                        <li class="list-group-item">Histórico de serviços.</li>
-                                        <li class="list-group-item">Consulta de faturas e status de pagamento / Ambiente financeiro.</li>
-                                        <li class="list-group-item">Solicitação de novos serviços e reagendamentos.</li>
-                                    </ul>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fa-solid fa-check-circle text-accent mt-1 me-3"></i>
+                                <div>
+                                    <strong>UX Research Centrado no Usuário:</strong>
+                                    <p class="small text-muted m-0">Desenhamos as telas pensando em quem vai usar, reduzindo a curva de aprendizado dos perfis de usuário.</p>
                                 </div>
-                            </div>
-                        </div>
-                        <!-- Módulo 3 -->
-                        <div class="accordion-item mb-3 border">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mod5">
-                                    <i class="fa-solid fa-layer-group me-2"></i> Módulo Maid/Helper - Prazo: 2 meses.
-                                </button>
-                            </h2>
-                            <!-- REMOVIDO: data-bs-parent="#accordionScope" -->
-                            <div id="mod5" class="accordion-collapse collapse">
-                                <div class="accordion-body">
-                                    <ul class="list-group list-group-flush">
-                                        <li class="list-group-item">Ambiente administrativo do helper/maid.</li>
-                                        <li class="list-group-item">Agenda: diária, semanal, mensal.</li>
-                                        <li class="list-group-item">Detalhes dos serviços.</li>
-                                        <li class="list-group-item">Registro de despesas relacionadas ao serviço.</li>
-                                    </ul>
+                            </li>
+                            <li class="mb-3 d-flex align-items-start">
+                                <i class="fa-solid fa-check-circle text-accent mt-1 me-3"></i>
+                                <div>
+                                    <strong>Quality Assurance (QA):</strong>
+                                    <p class="small text-muted m-0">Prazo de acompanhamento pós entrega para garantir que o produto esteja estável e apto a operar sobre estresse.</p>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-5">
-                <div class="col-md-6">
-                    <!-- Removido 'border border-light' para voltar ao original, mantendo apenas architecture-card -->
-                    <div class="p-4 bg-light rounded h-100 architecture-card">
-                        <h5 class="text-success mb-3"><i class="fa-solid fa-box-open me-2"></i>O que ESTÁ incluído</h5>
-                        <ul class="list-unstyled list-included">
-                            <li><i class="fa-solid fa-check"></i>Documentação do projeto.</li>
-                            <li><i class="fa-solid fa-check"></i>Código Fonte (Propriedade do Cliente).</li>
-                            <li><i class="fa-solid fa-check"></i>Deploy no ambiente de produção (a ser definido).</li>
-                            <li><i class="fa-solid fa-check"></i>Treinamento gravado para a equipe.</li>
-                            <li><i class="fa-solid fa-check"></i>Designe responsivo para desktops e smartphones.</li>
-                            <li><i class="fa-solid fa-check"></i>Garantia de bugs por 90 dias</li>
+                            </li>
                         </ul>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <!-- Mantido 'border border-light' original + architecture-card -->
-                    <div class="p-4 bg-light rounded h-100 border border-light architecture-card">
-                        <h5 class="text-muted mb-3"><i class="fa-solid fa-ban me-2"></i>O que NÃO está incluído</h5>
-                        <ul class="list-unstyled list-excluded">
-                            <li>Aplicativo Nativo (iOS/Android) nesta fase</li>
-                            <li>Migração de dados legados (cotado à parte)</li>
-                            <li>Custos mensais de servidor (ambiente de produção e desenvolvimento) e domínios</li>
-                            <li>Custos mensais de APIS's</li>
-                            <li>Implementação de agentes de IA.</li>
-                        </ul>
-                        <p class="small text-muted mt-3"><em>*Esta clareza é fundamental para uma parceria transparente, evitando surpresas futuras.</em></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Bloco 4: Cronograma -->
-    <section id="cronograma" class="section-padding bg-dark-brand text-white">
-        <div class="container">
-            <h2 class="text-center mb-5">Roadmap de Entrega</h2>
-            
-            <div class="timeline">
-                <div class="timeline-container left">
-                    <!-- Adicionado 'architecture-card' para motion de progresso -->
-                    <div class="timeline-content text-dark architecture-card">
-                        <h5 class="fw-bold">Módulo Central</h5>
-                        <p class="mb-0">Prazo de 4 meses.</p>
-                        <small class="text-muted">
-                            Esse módulo consiste na base fundamental do sistema. 
-                            Tudo o que for desenvolvido aqui influenciará e guiará
-                            o desenvolvimento dos demais componentes do produto. 
-                            Nesse módulo será tratado os ecossistemas do administrador
-                            do SaaS (proprietário do software) e dos clientes empresas
-                            (empresas de limpeza).
-                        </small>
-                    </div>
-                </div>
-                <div class="timeline-container right">
-                    <!-- Adicionado 'architecture-card' para motion de progresso -->
-                    <div class="timeline-content text-dark architecture-card">
-                        <h5 class="fw-bold">Módulo Cliente</h5>
-                        <p class="mb-0">Prazo de 2 meses</p>
-                        <small class="text-muted">
-                            Nesse módulo será tratado o desenvolvimento do ecossistema 
-                            do cliente final (famílias que contratam os serviços de limpeza).
-                        </small>
-                    </div>
-                </div>
-                <div class="timeline-container left">
-                    <!-- Adicionado 'architecture-card' para motion de progresso -->
-                    <div class="timeline-content text-dark architecture-card">
-                        <h5 class="fw-bold">Módulo Maid/Helper</h5>
-                        <p class="mb-0">Prazo de 2 meses</p>
-                        <small class="text-muted">
-                            Aqui será produzido o ecossistema 
-                            dos profissionais de limpeza.
-                        </small>
-                    </div>
-                </div>
-                <div class="timeline-container right">
-                    <!-- Adicionado 'architecture-card' para motion de progresso -->
-                    <div class="timeline-content text-dark architecture-card">
-                        <h5 class="fw-bold">Go-Live & Treinamento</h5>
-                        <p class="mb-0">Prazo duas semanas.</p>
-                        <small class="text-muted">
-                            Deselvimento dos vídeo de treinamento e documentação
-                            de instrução de uso.
-                        </small>
-                    </div>
-                </div>
-                <div class="timeline-container left">
-                    <!-- Adicionado 'architecture-card' para motion de progresso -->
-                    <div class="timeline-content text-dark architecture-card">
-                        <h5 class="fw-bold">Período de Testes e Garantia</h5>
-                        <p class="mb-0">Prazo de 3 meses</p>
-                        <small class="text-muted">
-                            Nessa fase do projeto o produto será posto em estresse
-                            controlado para avaliação de bugs e operacionalidade.
-                            Uma vez findo o perído, conclui-se o projeto de desenvolvimento
-                            e implementação.
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Bloco 5: Prova Social
-    <section class="section-padding bg-white">
-        <div class="container text-center">
-            <h3 class="mb-4">Quem confia na nossa metodologia</h3>
-            <p class="text-muted mb-5">Já resolvemos desafios de complexidade similar em:</p>
-            <div class="row opacity-50 grayscale align-items-center justify-content-center">
-                <div class="col-6 col-md-3 mb-4">
-                    <h4 class="fw-bold text-muted">LOGISTICA<span class="text-dark">CORP</span></h4>
-                </div>
-                <div class="col-6 col-md-3 mb-4">
-                    <h4 class="fw-bold text-muted">FIN<span class="text-dark">TECH</span>.IO</h4>
-                </div>
-                <div class="col-6 col-md-3 mb-4">
-                    <h4 class="fw-bold text-muted">AGRO<span class="text-dark">DATA</span></h4>
-                </div>
-            </div>
-        </div>
-    </section> -->
-
-    <!-- Bloco 6: Investimento (Fisher) -->
-    <section id="investimento" class="section-padding" style="background-color: #f4f5f7;">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2>Investimento para o Projeto</h2>
-                <!-- <p class="text-muted">Construímos dois cenários para sua análise, focando no ROI esperado.</p> -->
-            </div>
-
-            <div class="row align-items-center justify-content-center">
-                <!-- Opção 1
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="pricing-card architecture-card">
-                        <h4 class="text-muted">Opção A: MVP Essencial</h4>
-                        <div class="price-tag">
-                            <small>R$</small> 45.000
-                        </div>
-                        <p class="text-muted small">Foco total em resolver a dor imediata do Módulo de Gestão.</p>
-                        <hr>
-                        <ul class="list-unstyled small mb-4">
-                            <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módulo 1 (Gestão)</li>
-                            <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Painel Básico</li>
-                            <li class="mb-2 text-muted"><i class="fa-solid fa-times me-2"></i>Sem Integrações</li>
-                        </ul>
-                        <div class="text-center">
-                            <button class="btn btn-outline-secondary w-100" onclick="selectProposal('Completa')">Selecionar Opção A</button>
-                        </div>
-                    </div>
-                </div> -->
-
-                <!-- Opção 2 (Recomendada) -->
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="pricing-card featured architecture-card">
-                        <!-- <div class="badge-recommended">RECOMENDADO (MAIOR ROI)</div> -->
-                        <h4 class="text-accent">Solução Completa</h4>
-                        <div class="price-tag">
-                            <small>R$</small> 52.000
-                        </div>
-                        <p class="text-muted small">A solução definitiva para desenvolver e implementar o projeto.</p>
-                        <hr>
-                        <ul class="list-unstyled small mb-4">
-                            <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i><strong>Todos os Módulos (1, 2 e 3)</strong></li>
-                            <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módeulo Central - R$30.000,00</li>
-                            <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módulo Cliente - R$12.000,00</li>
-                            <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módulo Maid/Helper - R$10.000,00</li>
-                        </ul>
-                        <div class="text-center">
-                            <button class="btn btn-brand w-100" onclick="selectProposal('Completa')">Negócio fechado!</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-5">
-                <div class="col-lg-8 mx-auto">
-                    <div class="card bg-white border-0 shadow-sm">
-                        <div class="card-body p-4">
-                            <h5 class="card-title fw-bold mb-3"><i class="fa-solid fa-handshake text-accent me-2"></i>Fluxo Financeiro (Equilíbrio de Interesses)</h5>
-                            <div class="d-flex justify-content-between text-center flex-wrap">
-                                <div class="p-2">
-                                    <h3 class="text-dark">30%</h3>
-                                    <small class="text-muted">Assinatura do contrato de <br>desenvolvimento do módulo.</small>
+                    <!-- Aplicação do Motion na Coluna/Card solicitado -->
+                    <div class="col-lg-6 offset-lg-1">
+                        <div class="bg-white p-5 rounded shadow-sm border-top border-4 border-orange architecture-card">
+                            <h4 class="mb-3">Arquitetura da Solução</h4>
+                            <p>O sistema será uma <strong>Aplicação Web</strong>, permitindo acesso via desktop e design responsivo para mobile, o que remove a necessidade de desenvolvimento de um aplicativo por enquanto.</p>
+                            <hr>
+                            <div class="row text-center mt-4">
+                                <div class="col-4">
+                                    <i class="fa-brands fa-react fa-2x text-primary mb-2"></i>
+                                    <p class="small fw-bold">Frontend<br>React.js</p>
                                 </div>
-                                <div class="p-2 align-self-center text-muted d-none d-md-block"><i class="fa-solid fa-arrow-right"></i></div>
-                                <div class="p-2">
-                                    <h3 class="text-dark">40%</h3>
-                                    <small class="text-muted">Distribuído na entrega <br>das etapas de cada módulo.</small>
+                                <div class="col-4">
+                                    <i class="fa-brands fa-python fa-2x text-primary mb-2"></i>
+                                    <p class="small fw-bold">Backend<br>Python</p>
                                 </div>
-                                <div class="p-2 align-self-center text-muted d-none d-md-block"><i class="fa-solid fa-arrow-right"></i></div>
-                                <div class="p-2">
-                                    <h3 class="text-dark">30%</h3>
-                                    <small class="text-muted">Na entrega final do módulo.</small>
+                                <div class="col-4">
+                                    <i class="fa-solid fa-database fa-2x text-info mb-2"></i>
+                                    <p class="small fw-bold">Dados<br>PostgreSQL</p>
                                 </div>
                             </div>
-                            <div class="text-center mt-3">
-                                <small class="text-muted">Valores pagos por módulos; que são compostos por várias etapas.</small>
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Bloco 7: Próximos Passos (CTA) -->
-    <section id="proximos-passos" class="cta-section section-padding">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-8">
-                    <div class="validity-box">
-                        <i class="fa-regular fa-clock me-2"></i> Condições válidas até: 30/03/2026
-                    </div>
-                    <h2 class="mb-4">Pronto para dar vida a seu projeto?</h2>
-                    <!-- <p class="mb-5 text-light opacity-75">
-                        Para garantirmos o início do Kick-off na data planejada, precisamos do seu "de acordo" para reservar a squad de desenvolvimento.
-                    </p> -->
-                    
-                    
-                    <div class="d-grid gap-3 d-sm-flex justify-content-center">
-                        <a href="https://api.whatsapp.com/send/?phone=5585999068226&text&type=phone_number&app_absent=0" target="_blank">
-                        <button class="btn btn-brand btn-lg px-5" onclick="triggerConfetti()">
-                            <i class="fa-solid fa-signature me-2"></i>APROVAR PROPOSTA DIGITALMENTE
-                        </button>
-                    </a>
-                        <!-- <button class="btn btn-outline-light btn-lg px-4" onclick="window.print()">
-                            <i class="fa-solid fa-download me-2"></i> Baixar PDF
-                        </button> -->
-                    </div>
-                    <p class="mt-4 small opacity-50">Ao clicar em aprovar, daremos início à confecção dos contratos.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark-brand pt-5 pb-4 border-top border-secondary text-white">
-        <div class="container">
-            <div class="row align-items-center mb-5">
+        <!-- Bloco 3: Escopo e Entregáveis -->
+        <section id="escopo" class="section-padding">
+            <div class="container">
+                <h2 class="text-center mb-5">Escopo Funcional</h2>
                 
-                <!-- Coluna 1: Logo Ampliada (Sem Slogan) -->
-                <div class="col-md-4 text-center text-md-start mb-4 mb-md-0">
-                    <!-- Aumentado height de 50 para 80 para preencher o espaço -->
-                    <a href="https://www.leepcode.com.br/" target="_blank">
-                        <img src="https://lh3.googleusercontent.com/u/0/d/1A3GnfXXmHnzeuaJQPtV4xg_GLYzPSKFk" alt="SoftHouse Logo" height="80" class="mb-3" onerror="this.style.display='none'; document.getElementById('logo-fallback-footer').style.display='inline-block';">
-                        <!-- Fallback caso a imagem não carregue -->
-                        <span id="logo-fallback-footer" style="display:none; font-size: 2rem;"><i class="fa-solid fa-code text-accent"></i> SOFT<span class="text-accent">HOUSE</span></span>
-                    </a>
+                <div class="row">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="accordion" id="accordionScope">
+                            <!-- Módulo 1 -->
+                            <div class="accordion-item mb-3 border">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mod1">
+                                        <i class="fa-solid fa-layer-group me-2"></i> Módulo Central - Prazo: 4 Meses
+                                    </button>
+                                </h2>
+                                <div id="mod1" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">Acessoria e Documentação: Levantamento e documentação de toda a regra de negócio.</li>
+                                            <li class="list-group-item">Maids System: Ambiente administrativo de gestão e acompanhamento de dados da plataforma.</li>
+                                            <li class="list-group-item">Maids System: Controle financeiro da empresa SaaS.</li>
+                                            <li class="list-group-item">Ambiente administrativo do módulo central (configurações do perfil e parâmetros da conta da empresa de limpeza).</li>
+                                            <li class="list-group-item">Gestão de agendamentos: Criação, edição e visualização de serviços agendados.</li>
+                                            <li class="list-group-item">Cadastro e gerenciamento de clientes: Informações de contato, histórico de serviços, preferências.</li>
+                                            <li class="list-group-item">Controle financeiro: Emissão de faturas (invoices), registro de pagamentos recebidos e pendentes.</li>
+                                            <li class="list-group-item">Gestão de equipes: Atribuição de tarefas aos ajudantes e acompanhamento do status.</li>
+                                            <li class="list-group-item">Relatórios básicos: Desempenho de agendamentos e pagamentos.</li>
+                                            <li class="list-group-item">UX Design: Design responsivo para desktop e celular.</li>
+                                            <li class="list-group-item">Almoxarife para controle básico de estoque de consumo.</li>
+                                            <li class="list-group-item">Integrações com API’s: Integração com serviços externos.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Módulo 2 -->
+                            <div class="accordion-item mb-3 border">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mod2">
+                                        <i class="fa-solid fa-layer-group me-2"></i> Módulo Cliente - Prazo: 2 meses.
+                                    </button>
+                                </h2>
+                                <div id="mod2" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">Ambiente administrativo do cliente.</li>
+                                            <li class="list-group-item">Visualização de agendamentos/agenda.</li>
+                                            <li class="list-group-item">Histórico de serviços.</li>
+                                            <li class="list-group-item">Consulta de faturas e status de pagamento / Ambiente financeiro.</li>
+                                            <li class="list-group-item">Solicitação de novos serviços e reagendamentos.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Módulo 3 -->
+                            <div class="accordion-item mb-3 border">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mod5">
+                                        <i class="fa-solid fa-layer-group me-2"></i> Módulo Maid/Helper - Prazo: 2 meses.
+                                    </button>
+                                </h2>
+                                <div id="mod5" class="accordion-collapse collapse">
+                                    <div class="accordion-body">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">Ambiente administrativo do helper/maid.</li>
+                                            <li class="list-group-item">Agenda: diária, semanal, mensal.</li>
+                                            <li class="list-group-item">Detalhes dos serviços.</li>
+                                            <li class="list-group-item">Registro de despesas relacionadas ao serviço.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="row mt-5">
+                    <div class="col-md-6">
+                        <div class="p-4 bg-light rounded h-100 architecture-card">
+                            <h5 class="text-success mb-3"><i class="fa-solid fa-box-open me-2"></i>O que ESTÁ incluído</h5>
+                            <ul class="list-unstyled list-included">
+                                <li><i class="fa-solid fa-check"></i>Documentação do projeto.</li>
+                                <li><i class="fa-solid fa-check"></i>Código Fonte (Propriedade do Cliente).</li>
+                                <li><i class="fa-solid fa-check"></i>Deploy no ambiente de produção (a ser definido).</li>
+                                <li><i class="fa-solid fa-check"></i>Treinamento gravado para a equipe.</li>
+                                <li><i class="fa-solid fa-check"></i>Designe responsivo para desktops e smartphones.</li>
+                                <li><i class="fa-solid fa-check"></i>Garantia de bugs por 90 dias</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 bg-light rounded h-100 border border-light architecture-card">
+                            <h5 class="text-muted mb-3"><i class="fa-solid fa-ban me-2"></i>O que NÃO está incluído</h5>
+                            <ul class="list-unstyled list-excluded">
+                                <li>Aplicativo Nativo (iOS/Android) nesta fase</li>
+                                <li>Migração de dados legados (cotado à parte)</li>
+                                <li>Custos mensais de servidor (ambiente de produção e desenvolvimento) e domínios</li>
+                                <li>Custos mensais de APIS's</li>
+                                <li>Implementação de agentes de IA.</li>
+                            </ul>
+                            <p class="small text-muted mt-3"><em>*Esta clareza é fundamental para uma parceria transparente, evitando surpresas futuras.</em></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bloco 4: Cronograma -->
+        <section id="cronograma" class="section-padding bg-dark-brand text-white">
+            <div class="container">
+                <h2 class="text-center mb-5">Roadmap de Entrega</h2>
                 
-                <!-- Coluna 2: Contatos Diretos -->
-                <div class="col-md-4 text-center mb-4 mb-md-0">
-                    <div class="d-flex flex-column align-items-center justify-content-center gap-2">
-                        <a href="mailto:contato@leepcode.com.br" class="text-white text-decoration-none hover-accent">
-                            <i class="fa-solid fa-envelope text-accent me-2"></i> contato@leepcode.com.br
+                <div class="timeline">
+                    <div class="timeline-container left">
+                        <div class="timeline-content text-dark architecture-card">
+                            <h5 class="fw-bold">Módulo Central</h5>
+                            <p class="mb-0">Prazo de 4 meses.</p>
+                            <small class="text-muted">
+                                Esse módulo consiste na base fundamental do sistema. 
+                                Tudo o que for desenvolvido aqui influenciará e guiará
+                                o desenvolvimento dos demais componentes do produto. 
+                                Nesse módulo será tratado os ecossistemas do administrador
+                                do SaaS (proprietário do software) e dos clientes empresas
+                                (empresas de limpeza).
+                            </small>
+                        </div>
+                    </div>
+                    <div class="timeline-container right">
+                        <div class="timeline-content text-dark architecture-card">
+                            <h5 class="fw-bold">Módulo Cliente</h5>
+                            <p class="mb-0">Prazo de 2 meses</p>
+                            <small class="text-muted">
+                                Nesse módulo será tratado o desenvolvimento do ecossistema 
+                                do cliente final (famílias que contratam os serviços de limpeza).
+                            </small>
+                        </div>
+                    </div>
+                    <div class="timeline-container left">
+                        <div class="timeline-content text-dark architecture-card">
+                            <h5 class="fw-bold">Módulo Maid/Helper</h5>
+                            <p class="mb-0">Prazo de 2 meses</p>
+                            <small class="text-muted">
+                                Aqui será produzido o ecossistema 
+                                dos profissionais de limpeza.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="timeline-container right">
+                        <div class="timeline-content text-dark architecture-card">
+                            <h5 class="fw-bold">Go-Live & Treinamento</h5>
+                            <p class="mb-0">Prazo duas semanas.</p>
+                            <small class="text-muted">
+                                Deselvimento dos vídeo de treinamento e documentação
+                                de instrução de uso.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="timeline-container left">
+                        <div class="timeline-content text-dark architecture-card">
+                            <h5 class="fw-bold">Período de Testes e Garantia</h5>
+                            <p class="mb-0">Prazo de 3 meses</p>
+                            <small class="text-muted">
+                                Nessa fase do projeto o produto será posto em estresse
+                                controlado para avaliação de bugs e operacionalidade.
+                                Uma vez findo o perído, conclui-se o projeto de desenvolvimento
+                                e implementação.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bloco 6: Investimento (Fisher) -->
+        <section id="investimento" class="section-padding" style="background-color: #f4f5f7;">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2>Investimento para o Projeto</h2>
+                </div>
+
+                <div class="row align-items-center justify-content-center">
+                    <!-- Opção 2 (Recomendada) -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="pricing-card featured architecture-card">
+                            <h4 class="text-accent">Solução Completa</h4>
+                            <div class="price-tag">
+                                <small>R$</small> 52.000
+                            </div>
+                            <p class="text-muted small">A solução definitiva para desenvolver e implementar o projeto.</p>
+                            <hr>
+                            <ul class="list-unstyled small mb-4">
+                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i><strong>Todos os Módulos (1, 2 e 3)</strong></li>
+                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módeulo Central - R$30.000,00</li>
+                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módulo Cliente - R$12.000,00</li>
+                                <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Módulo Maid/Helper - R$10.000,00</li>
+                            </ul>
+                            <div class="text-center">
+                                <button class="btn btn-brand w-100" onclick="selectProposal('Completa')">Negócio fechado!</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-lg-8 mx-auto">
+                        <div class="card bg-white border-0 shadow-sm">
+                            <div class="card-body p-4">
+                                <h5 class="card-title fw-bold mb-3"><i class="fa-solid fa-handshake text-accent me-2"></i>Fluxo Financeiro (Equilíbrio de Interesses)</h5>
+                                <div class="d-flex justify-content-between text-center flex-wrap">
+                                    <div class="p-2">
+                                        <h3 class="text-dark">30%</h3>
+                                        <small class="text-muted">Assinatura do contrato de <br>desenvolvimento do módulo.</small>
+                                    </div>
+                                    <div class="p-2 align-self-center text-muted d-none d-md-block"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="p-2">
+                                        <h3 class="text-dark">40%</h3>
+                                        <small class="text-muted">Distribuído na entrega <br>das etapas de cada módulo.</small>
+                                    </div>
+                                    <div class="p-2 align-self-center text-muted d-none d-md-block"><i class="fa-solid fa-arrow-right"></i></div>
+                                    <div class="p-2">
+                                        <h3 class="text-dark">30%</h3>
+                                        <small class="text-muted">Na entrega final do módulo.</small>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">Valores pagos por módulos; que são compostos por várias etapas.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bloco 7: Próximos Passos (CTA) -->
+        <section id="proximos-passos" class="cta-section section-padding">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <div class="validity-box">
+                            <i class="fa-regular fa-clock me-2"></i> Condições válidas até: 30/03/2026
+                        </div>
+                        <h2 class="mb-4">Pronto para dar vida a seu projeto?</h2>
+                        
+                        <div class="d-grid gap-3 d-sm-flex justify-content-center">
+                            <a href="https://api.whatsapp.com/send/?phone=5585999068226&text&type=phone_number&app_absent=0" target="_blank">
+                            <button class="btn btn-brand btn-lg px-5" onclick="triggerConfetti()">
+                                <i class="fa-solid fa-signature me-2"></i>APROVAR PROPOSTA DIGITALMENTE
+                            </button>
                         </a>
-                        <a href="tel:+5585999068226" class="text-white text-decoration-none hover-accent">
-                            <i class="fa-solid fa-phone text-accent me-2"></i> (85) 99906-8226
+                        </div>
+                        <p class="mt-4 small opacity-50">Ao clicar em aprovar, daremos início à confecção dos contratos.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-dark-brand pt-5 pb-4 border-top border-secondary text-white">
+            <div class="container">
+                <div class="row align-items-center mb-5">
+                    <div class="col-md-4 text-center text-md-start mb-4 mb-md-0">
+                        <a href="https://www.leepcode.com.br/" target="_blank">
+                            <img src="https://lh3.googleusercontent.com/u/0/d/1A3GnfXXmHnzeuaJQPtV4xg_GLYzPSKFk" alt="SoftHouse Logo" height="80" class="mb-3" onerror="this.style.display='none'; document.getElementById('logo-fallback-footer').style.display='inline-block';">
+                            <span id="logo-fallback-footer" style="display:none; font-size: 2rem;"><i class="fa-solid fa-code text-accent"></i> SOFT<span class="text-accent">HOUSE</span></span>
                         </a>
                     </div>
-                </div>
+                    
+                    <div class="col-md-4 text-center mb-4 mb-md-0">
+                        <div class="d-flex flex-column align-items-center justify-content-center gap-2">
+                            <a href="mailto:contato@leepcode.com.br" class="text-white text-decoration-none hover-accent">
+                                <i class="fa-solid fa-envelope text-accent me-2"></i> contato@leepcode.com.br
+                            </a>
+                            <a href="tel:+5585999068226" class="text-white text-decoration-none hover-accent">
+                                <i class="fa-solid fa-phone text-accent me-2"></i> (85) 99906-8226
+                            </a>
+                        </div>
+                    </div>
 
-                <!-- Coluna 3: Redes Sociais -->
-                <div class="col-md-4 text-center text-md-end">
-                    <div class="d-flex justify-content-center justify-content-md-end gap-3">
-                        <a href="https://www.instagram.com/leepcode/" class="social-icon" title="Instagram" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-                        <a href="https://api.whatsapp.com/send/?phone=5585999068226&text&type=phone_number&app_absent=0" class="social-icon" title="WhatsApp" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
-                        <a href="https://www.leepcode.com.br/" class="social-icon" title="Website" target="_blank"><i class="fa-solid fa-globe"></i></a>
+                    <div class="col-md-4 text-center text-md-end">
+                        <div class="d-flex justify-content-center justify-content-md-end gap-3">
+                            <a href="https://www.instagram.com/leepcode/" class="social-icon" title="Instagram" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                            <a href="https://api.whatsapp.com/send/?phone=5585999068226&text&type=phone_number&app_absent=0" class="social-icon" title="WhatsApp" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                            <a href="https://www.leepcode.com.br/" class="social-icon" title="Website" target="_blank"><i class="fa-solid fa-globe"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="border-secondary opacity-25">
+                
+                <div class="row">
+                    <div class="col-12 text-center text-white small opacity-75">
+                        <p class="mb-0">&copy; 2026 LeepCode. Todos os direitos reservados.</p>
                     </div>
                 </div>
             </div>
-            
-            <hr class="border-secondary opacity-25">
-            
-            <div class="row">
-                <!-- Ajuste de Contraste: Removido 'text-muted' e 'opacity-50'. 
-                     Usando 'text-white' com 'opacity-75' para garantir leitura perfeita. -->
-                <div class="col-12 text-center text-white small opacity-75">
-                    <p class="mb-0">&copy; 2026 LeepCode. Todos os direitos reservados.</p>
-                    <!-- <p class="mb-0">Rua da Inovação, 123 - Tech Park</p> -->
-                </div>
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div> <!-- Fim Secure Wrapper -->
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     
     <script>
-        // Set dynamic date for urgency (Cialdini's Scarcity)
+        // --- INÍCIO: SCRIPTS DE SEGURANÇA E PROTEÇÃO ---
 
+        // Váriaveis de Controle de Penalidade
+        let isPenaltyActive = false;
+        let penaltyTimer = null;
+
+        // 1. Bloqueia o clique com o Botão Direito (Menu de contexto)
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+
+        // 2. Lógica de Blackout e Penalidade
+        function applySecurityBlur() {
+            document.body.classList.add('is-secured');
+        }
+
+        function removeSecurityBlur() {
+            // Nova Regra: Se a penalidade estiver ativa, a tela não será desbloqueada.
+            if (isPenaltyActive) return; 
+            document.body.classList.remove('is-secured');
+        }
+
+        // Nova Função: Dispara a penalidade de 10 minutos
+        function triggerPenalty() {
+            isPenaltyActive = true;
+            applySecurityBlur();
+            
+            // Altera as mensagens do overlay
+            const titleEl = document.getElementById('security-title');
+            const msgEl = document.getElementById('security-message');
+            const originalTitle = "Conteúdo Protegido";
+            const originalMsg = "Conteúdo contém informações sigilosas.";
+            
+            titleEl.innerText = "Conteúdo Protegido";
+            msgEl.innerHTML = "O conteúdo foi bloqueado por segurança.<br> Recarregue a tela.";
+            msgEl.style.color = "#fa5a1d"; // Destaca a mensagem de aviso
+
+            clearTimeout(penaltyTimer);
+            
+            // Inicia o contador de 10 minutos (600.000 ms)
+            penaltyTimer = setTimeout(function() {
+                isPenaltyActive = false;
+                
+                // Restaura os textos originais
+                titleEl.innerText = originalTitle;
+                msgEl.innerText = originalMsg;
+                msgEl.style.color = "var(--grey-light)";
+                
+                // Remove o blackout caso o usuário esteja ativamente na tela
+                if (!document.hidden && document.hasFocus()) {
+                    removeSecurityBlur();
+                }
+            }, 600000); // 10 * 60 * 1000 = 600.000 ms
+        }
+
+        // TÁTICA 1: Oculta a página se o rato sair da janela (Mouseleave)
+        document.documentElement.addEventListener('mouseleave', applySecurityBlur);
+        document.documentElement.addEventListener('mouseenter', removeSecurityBlur);
+
+        // TÁTICA 2: Se a janela perder o foco (Alt+Tab, menu iniciar, barra de tarefas)
+        window.addEventListener('blur', applySecurityBlur);
+        window.addEventListener('focus', removeSecurityBlur);
+        
+        // REFORÇO: API de Visibilidade (Garante o blackout se ele trocar de aba ou minimizar)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                applySecurityBlur();
+            } else {
+                removeSecurityBlur();
+            }
+        });
+        
+        // Anti-PrintScreen Event Listener e Combinação de Teclas
+        document.addEventListener('keydown', function(event) {
+            
+            // NOVA REGRA: Detectar "WinKey/Meta" + "Shift" simultaneamente
+            // Isso também engloba atalhos como Win+Shift+S nativamente
+            if (event.metaKey && event.shiftKey) {
+                triggerPenalty();
+                event.preventDefault();
+                return false;
+            }
+
+            // Tecla Print Screen
+            if (event.key === 'PrintScreen' || event.keyCode === 44) {
+                applySecurityBlur();
+            }
+            
+            // Bloqueio de Atalhos de Desenvolvedor e Cópia
+            if (event.keyCode === 123 || // F12
+               (event.ctrlKey && event.shiftKey && event.keyCode === 73) || // Ctrl+Shift+I
+               (event.ctrlKey && event.shiftKey && event.keyCode === 74) || // Ctrl+Shift+J
+               (event.ctrlKey && event.keyCode === 85) || // Ctrl+U
+               (event.ctrlKey && event.keyCode === 67) || // Ctrl+C
+               (event.ctrlKey && event.keyCode === 80)) { // Ctrl+P
+                event.preventDefault(); 
+                return false;
+            }
+
+            // Bloqueio Ctrl+Shift+S / Cmd+Shift+S
+            if (event.shiftKey && (event.key === 's' || event.key === 'S' || event.keyCode === 83)) {
+                if (event.metaKey || event.ctrlKey) {
+                    applySecurityBlur(); // A regra do Win+Shift acima já pegaria isso no Windows, mas mantemos por redundância (Ctrl no Linux/etc)
+                    event.preventDefault(); 
+                    return false;
+                }
+            }
+        });
+
+        document.addEventListener('keyup', function(event) {
+            // Só libera o PrintScreen básico depois de 1.5s, se a penalidade não estiver ativa
+            if (event.key === 'PrintScreen' || event.keyCode === 44) {
+                setTimeout(removeSecurityBlur, 1500); 
+            }
+        });
+        
+        // --- FIM: SCRIPTS DE SEGURANÇA E PROTEÇÃO ---
 
         // Typewriter Logic
         const textPart1 = "Desenvolvimento com segurança e garantia do projeto ";
         const textPart2 = "MaidSys";
-        const speed = 50; // Velocidade de digitação em ms
+        const speed = 50;
         const element1 = document.getElementById("type-part1");
         const element2 = document.getElementById("type-part2");
 
@@ -919,19 +1037,15 @@
             }
         }
 
-        // Inicia a animação quando a página carrega
         window.onload = function() {
             typeWriter();
         };
 
-        // Interaction for "Approving"
         function selectProposal(type) {
-            // Smooth scroll to CTA
             document.getElementById('proximos-passos').scrollIntoView({ behavior: 'smooth' });
         }
 
         function triggerConfetti() {
-            // Visual feedback for commitment
             var duration = 3 * 1000;
             var animationEnd = Date.now() + duration;
             var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
@@ -952,8 +1066,6 @@
               confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.1, 0.3), y: Math.random() - 0.2 } }));
               confetti(Object.assign({}, defaults, { particleCount, origin: { x: random(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
-
-            // REMOVIDO: O bloco setTimeout com o alert() foi excluído para melhorar a UX e evitar interrupções.
         }
     </script>
 </body>
